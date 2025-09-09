@@ -46,8 +46,16 @@
             <unpack>true</unpack>
             <scope>provided</scope>
             <includes>
-                <include>*:jinput-platform:*</include>
+                <include>*:jinput:*</include>
             </includes>
         </dependencySet>
     </dependencySets>
+    <files>
+        <!-- Copy libjinput-osx.jnilib from natives and rename to libjinput-osx.dylib -->
+        <file>
+            <source>${project.build.directory}/natives/libjinput-osx.jnilib</source>
+            <outputDirectory>/matlab/lib/</outputDirectory>
+            <destName>libjinput-osx.dylib</destName>
+        </file>
+    </files>
 </assembly>
