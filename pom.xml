@@ -31,6 +31,9 @@
         <contributor>
             <name>Jonas Withelm</name>
         </contributor>
+        <contributor>
+            <name>Bartek Grochowski</name>
+        </contributor>
     </contributors>
     
     <scm>
@@ -47,8 +50,7 @@
         <jinput.version>2.0.10</jinput.version>
 
         <!-- Default to minimum Java version compatible with MATLAB >2009a -->
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.compiler.release>8</maven.compiler.release>
 
         <!-- Other Properties -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -56,13 +58,7 @@
 
     <dependencies>
 
-        <dependency> <!-- Java Joystick Input -->
-            <groupId>net.java.jinput</groupId>
-            <artifactId>jinput</artifactId>
-            <version>${jinput.version}</version>
-        </dependency>
-
-        <dependency> <!-- Java Joystick JNI Binaries (Windows) -->
+        <dependency> <!-- Java Joystick JNI Binaries -->
             <groupId>net.java.jinput</groupId>
             <artifactId>jinput</artifactId>
             <version>${jinput.version}</version>
@@ -81,7 +77,77 @@
     <build>
         <plugins>
 
-            <plugin> <!-- Builds a jar that includes all runtime dependencies -->
+            <!-- Unpack jinput + platform sources -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.6.1</version>
+                <executions>
+                    <execution>
+                        <id>unpack-jinput-sources</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>net.java.jinput</groupId>
+                                    <artifactId>jinput</artifactId>
+                                    <version>${jinput.version}</version>
+                                    <classifier>sources</classifier>
+                                    <outputDirectory>${project.build.directory}/jinput-src</outputDirectory>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>net.java.jinput</groupId>
+                                    <artifactId>windows-plugin</artifactId>
+                                    <version>${jinput.version}</version>
+                                    <classifier>sources</classifier>
+                                    <outputDirectory>${project.build.directory}/jinput-src</outputDirectory>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>net.java.jinput</groupId>
+                                    <artifactId>linux-plugin</artifactId>
+                                    <version>${jinput.version}</version>
+                                    <classifier>sources</classifier>
+                                    <outputDirectory>${project.build.directory}/jinput-src</outputDirectory>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>net.java.jinput</groupId>
+                                    <artifactId>osx-plugin</artifactId>
+                                    <version>${jinput.version}</version>
+                                    <classifier>sources</classifier>
+                                    <outputDirectory>${project.build.directory}/jinput-src</outputDirectory>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Add jinput sources to compilation -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>3.5.0</version>
+                <executions>
+                    <execution>
+                        <id>add-jinput-source</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>${project.build.directory}/jinput-src</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Shade plugin: bundle everything -->
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
                 <version>2.4.3</version>
@@ -95,10 +161,16 @@
                 </executions>
                 <configuration>
                     <finalName>${releaseName}</finalName>
+                    <artifactSet>
+                        <excludes>
+                            <exclude>net.java.jinput:jinput</exclude>
+                        </excludes>
+                    </artifactSet>
                 </configuration>
             </plugin>
 
-            <plugin> <!-- Change MATLAB script to reference the correct jar file -->
+            <!-- Replace release name in MATLAB files -->
+            <plugin>
                 <groupId>com.google.code.maven-replacer-plugin</groupId>
                 <artifactId>replacer</artifactId>
                 <version>1.5.2</version>
@@ -139,7 +211,8 @@
                 </executions>
             </plugin>
 
-            <plugin> <!-- Creates a release zip file-->
+            <!-- Creates release zip -->
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <version>3.0.0</version>
