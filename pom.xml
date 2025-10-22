@@ -119,6 +119,13 @@
                                     <classifier>sources</classifier>
                                     <outputDirectory>${project.build.directory}/jinput-src</outputDirectory>
                                 </artifactItem>
+                                <artifactItem>
+                                    <groupId>net.java.jinput</groupId>
+                                    <artifactId>awt-plugin</artifactId>
+                                    <version>${jinput.version}</version>
+                                    <classifier>sources</classifier>
+                                    <outputDirectory>${project.build.directory}/jinput-src</outputDirectory>
+                                </artifactItem>
                             </artifactItems>
                         </configuration>
                     </execution>

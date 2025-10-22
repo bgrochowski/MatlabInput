@@ -54,7 +54,7 @@
         <!-- Copy libjinput-osx.jnilib from natives and rename to libjinput-osx.dylib -->
         <file>
             <source>${project.build.directory}/natives/libjinput-osx.jnilib</source>
-            <outputDirectory>/matlab/lib/</outputDirectory>
+            <outputDirectory>matlab/lib/</outputDirectory>
             <destName>libjinput-osx.dylib</destName>
         </file>
     </files>
